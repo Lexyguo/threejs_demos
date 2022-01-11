@@ -6,14 +6,14 @@ import {
   Scene,
   Color,
   Group,
-  DoubleSide,
-  LineSegments,
   WebGLRenderer,
+  BoxGeometry,
   ExtrudeGeometry,
-  LineBasicMaterial,
+  DirectionalLight,
   MeshPhongMaterial,
   PerspectiveCamera,
 } from "three";
+import { onMounted, onUpdated } from "vue";
 
 const scene = new Scene();
 scene.background = new Color(0x444444);
@@ -29,12 +29,12 @@ const camera = new PerspectiveCamera(
   0.1,
   50
 );
-camera.position.z = 30;
+camera.position.z = 35;
 
 // 图形配置
 const extrudeSettings = {
-  steps: 4,
-  depth: 19,
+  steps: 9,
+  depth: 9,
   bevelEnabled: true,
   bevelThickness: 1,
   bevelSize: 1,
@@ -42,8 +42,8 @@ const extrudeSettings = {
   bevelSegments: 7,
 };
 
-const length = 10,
-  width = 8;
+const length = 9,
+  width = 9;
 
 const shape = new Shape();
 shape.moveTo(0, 0);
@@ -54,33 +54,41 @@ shape.lineTo(0, 0);
 
 const group = new Group();
 
-const geometry = new ExtrudeGeometry(shape, extrudeSettings);
-geometry.center();
+// const geometry = new ExtrudeGeometry(shape, extrudeSettings);
+const geometry = new BoxGeometry(10, 10, 10);
 
-// 线性纹理
-const lineMaterial = new LineBasicMaterial({
-  color: 0xffffff,
-  transparent: true,
-  opacity: 0.5,
-});
+geometry.center();
+// 光点
+var light = new DirectionalLight(0xf39048, 0.8);
+light.position.set(20, 30, 60);
+light.target.position.set(0, 0, 20);
+light.castShadow = true;
+// these six values define the boundaries of the yellow box seen above
+light.shadow.camera.near = 2;
+light.shadow.camera.far = 5;
+light.shadow.camera.left = -0.5;
+light.shadow.camera.right = 0.5;
+light.shadow.camera.top = 0.5;
+light.shadow.camera.bottom = -0.5;
+// 加光源
+scene.add(light);
+
 // 矩形纹理
 const meshMaterial = new MeshPhongMaterial({
-  color: 0x156289,
-  emissive: 0x072534,
-  side: DoubleSide,
-  flatShading: false,
+  color: 0xf5f5f5,
+  // emissive: 0xe9eaed, // 材质的放射（光）颜色，基本上是不受其他光照影响的固有颜色。默认为黑色。
+  shininess: 10,
 });
 
-// 整合图形和纹理
-group.add(new LineSegments(geometry, lineMaterial));
+// 整合纹理
 group.add(new Mesh(geometry, meshMaterial));
 scene.add(group);
 
 function animate() {
   requestAnimationFrame(animate);
 
-  group.rotation.x += 0.005;
-  group.rotation.y += 0.005;
+  group.rotation.x += 0.01;
+  group.rotation.y += 0.01;
 
   renderer.render(scene, camera);
 }
@@ -96,5 +104,10 @@ window.addEventListener(
   false
 );
 
-animate();
+onMounted(() => {
+  animate();
+});
+onUpdated(() => {
+  renderer.render(scene, camera);
+});
 </script>
