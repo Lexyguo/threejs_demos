@@ -2,10 +2,7 @@
 <script setup lang="ts">
 import {
   Mesh,
-  Shape,
   Scene,
-  Color,
-  Group,
   Texture,
   AxesHelper,
   BoxGeometry,
@@ -14,12 +11,12 @@ import {
   TextureLoader,
   WebGLRenderer,
   RepeatWrapping,
-  ExtrudeGeometry,
   DirectionalLight,
   PerspectiveCamera,
   MeshLambertMaterial,
 } from "three";
 import { onMounted, onUpdated } from "vue";
+import * as refrigerator from "./Refrigerator.vue";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 const props = defineProps({
   innerWidth: {
@@ -73,6 +70,8 @@ function initFloor(texture: Texture) {
   floor.position.set(150, -10, 100);
   scene.add(floor);
 }
+
+refrigerator.init(0, 0, 0, scene, render);
 
 //配置光源
 var dircLight;
