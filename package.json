@@ -8,6 +8,7 @@
   },
   "dependencies": {
     "@types/node": "^17.0.8",
+    "@types/three": "^0.136.1",
     "three": "^0.136.0",
     "vue": "^3.2.25"
   },

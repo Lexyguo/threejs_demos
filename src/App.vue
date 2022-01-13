@@ -1,9 +1,11 @@
 <script setup lang="ts">
-import VRThing from "./components/VRThing.vue";
+import Floor from "./components/Floor.vue";
 </script>
 
 <template>
-  <VRThing></VRThing>
+  <div :style="{ width: 200, height: 200, margin: '10px auto' }">
+    <Floor></Floor>
+  </div>
 </template>
 
 <style>
