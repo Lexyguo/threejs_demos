@@ -35,7 +35,7 @@ var camera: PerspectiveCamera;
 function initCamera() {
   camera = new PerspectiveCamera(45, innerWidth / innerHeight, 0.1, 2000);
   // 视角
-  camera.position.set(100, 300, (innerWidth * 2) / 3);
+  camera.position.set(50, 100, 500);
   // const helper = new CameraHelper(camera);
   // scene.add(helper);
 }
@@ -50,7 +50,7 @@ function initTexture() {
   var floorTexture: TextureLoader = new TextureLoader();
   floorTexture.load("/src/assets/img/floor.jpeg", (texture: Texture) => {
     texture.wrapS = texture.wrapT = RepeatWrapping;
-    texture.repeat.set(14, 10);
+    texture.repeat.set(40, 40);
     initFloor(texture);
     render();
   });
@@ -60,13 +60,13 @@ initTexture();
 // 地板
 var floor;
 function initFloor(texture: Texture) {
-  var geometry = new BoxGeometry(500, 5, 500);
+  var geometry = new BoxGeometry(10000, 5, 10000);
   var material = new MeshLambertMaterial({
     color: 0xffffff,
     map: texture,
   });
   floor = new Mesh(geometry, material);
-  floor.position.set(150, -10, 100);
+  floor.position.set(150, -5, 200);
   scene.add(floor);
 }
 
@@ -76,7 +76,7 @@ refrigerator.init(0, 0, 0, 0xffffff, scene, render);
 var dircLight;
 function initLight() {
   dircLight = new DirectionalLight(0xffffff);
-  dircLight.position.set(300, 400, 300);
+  dircLight.position.set(300, 300, 500);
   scene.add(dircLight);
   scene.add(new AmbientLight(0x444444));
 }

@@ -3,11 +3,16 @@ import {
   Mesh,
   Scene,
   Group,
+  Clock,
   Texture,
   BoxGeometry,
   TextureLoader,
+  AnimationClip,
+  KeyframeTrack,
+  AnimationMixer,
   MeshBasicMaterial,
   MeshLambertMaterial,
+  MeshPhysicalMaterial,
 } from "three";
 import { CSG } from "three-csg-ts";
 
@@ -19,6 +24,9 @@ export function init(
   scene: Scene,
   render: Function
 ) {
+  // 创建时钟
+  const clock = new Clock();
+
   var innnerX = x;
   var innnerY = y;
   var innnerZ = z;
@@ -47,7 +55,7 @@ export function init(
       doorGroup.position.set(innnerX, innnerY, innnerZ);
 
       // 正前方顶部广告位
-      var topAdGeo = new BoxGeometry(dw, 30, 2); // 柜子门宽，高，厚
+      var topAdGeo = new BoxGeometry(dw, 30, 4); // 柜子门宽，高，厚
       var topAd = new Mesh(
         topAdGeo,
         new MeshLambertMaterial({ color: themeColor })
@@ -57,7 +65,7 @@ export function init(
       doorGroup.add(topAd);
 
       //设置柜体门
-      var doorGeo = new BoxGeometry(dw, 100, 2); // 柜子门宽，高，厚
+      var doorGeo = new BoxGeometry(dw, 100, 4); // 柜子门宽，高，厚
       // 门框
       var doorFrame = new Mesh(
         doorGeo,
@@ -69,51 +77,32 @@ export function init(
       doorFrame.updateMatrix();
 
       // 玻璃部分
-      var grassGeo = new BoxGeometry(dw - 4, 92, 2); // 柜子玻璃部宽，高，厚
-      var mMaterials = [];
-      mMaterials.push(
-        new MeshBasicMaterial({
-          color: 0x58acfa,
-          opacity: 0.4,
+      var grassGeo = new BoxGeometry(dw - 4, 92, 4); // 柜子玻璃部宽，高，厚
+      var grass = new Mesh(
+        grassGeo,
+        new MeshPhysicalMaterial({
+          map: null,
+          color: 0xcfcfcf,
+          metalness: 0,
+          roughness: 0,
+          opacity: 0.45,
           transparent: true,
-        }),
-        new MeshBasicMaterial({
-          color: 0x58acfa,
-          opacity: 0.4,
-          transparent: true,
-        }),
-        new MeshBasicMaterial({
-          color: 0x58acfa,
-          opacity: 0.4,
-          transparent: true,
-        }),
-        new MeshBasicMaterial({
-          color: 0x58acfa,
-          opacity: 0.4,
-          transparent: true,
-        }),
-        new MeshBasicMaterial({
-          color: 0x58acfa,
-          opacity: 0.4,
-          transparent: true,
-        }), // 玻璃质感
-        new MeshBasicMaterial({
-          color: 0x58acfa,
-          opacity: 0.4,
-          transparent: true,
-        }) // 玻璃质感
+          envMapIntensity: 10,
+          premultipliedAlpha: true,
+        })
       );
-
-      var grass = new Mesh(grassGeo, mMaterials);
       grass.name = "Door Frame Grass";
       grass.position.set(dw / 2, dh - 82, dw);
       // 为了做门的几何运算（并集）
       grass.updateMatrix();
       var door = CSG.subtract(doorFrame, grass);
+      door.position.x = dw;
+      door.position.z = (dd * 3) / 2;
+      door.rotation.y = -Math.PI / 2;
       doorGroup.add(door);
 
       // 正前方底部广告位
-      var bottomAdGeo = new BoxGeometry(dw, 30, 2); // 柜子门宽，高，厚
+      var bottomAdGeo = new BoxGeometry(dw, 30, 4); // 柜子门宽，高，厚
       var bottomAd = new Mesh(
         bottomAdGeo,
         new MeshLambertMaterial({ color: themeColor })
