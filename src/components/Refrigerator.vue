@@ -9,147 +9,176 @@ import {
   MeshBasicMaterial,
   MeshLambertMaterial,
 } from "three";
+import { CSG } from "three-csg-ts";
 
 export function init(
   x: number,
   y: number,
   z: number,
+  themeColor: number,
   scene: Scene,
   render: Function
 ) {
   var innnerX = x;
   var innnerY = y;
   var innnerZ = z;
+  var themeColor = themeColor;
 
-  var dk = 50;
-  var dc = 50;
+  var dw = 50; // 柜体外沿长
+  var dd = 50; // 柜体外沿宽(深)
+  var dh = 166; // 柜体外沿高
 
   // 设置机箱的外壳
-  var refrigeratorMatLambert: MeshLambertMaterial;
-  var refrigeratorMatBasic: MeshBasicMaterial;
+  var refrigeratorMatLambert: MeshLambertMaterial; // 机柜纹理
+  var refrigeratorMatBasic: MeshBasicMaterial; // 机柜外壳基础
   var refrigeratorzMat: Mesh;
+
+  var refrigeratorGroup = new Group();
+  // refrigeratorGroup的平面中心是机柜主体的平面中心
+  refrigeratorGroup.position.set(innnerX, innnerY, innnerZ);
+  refrigeratorGroup.name = "refrigeratorGroup";
 
   // 正视图
   var frontTexture: TextureLoader = new TextureLoader();
-  frontTexture.load("/src/assets/img/refrigerator_front.png");
-  // 左视图
-  var leftTexture: TextureLoader = new TextureLoader();
-  leftTexture.load(
+  frontTexture.load(
     "/src/assets/img/refrigerator_front.png",
     (texture: Texture) => {
-      refrigeratorMatLambert = new MeshLambertMaterial({
-        color: 0xeeeeee,
-        map: texture,
-      });
-      refrigeratorMatBasic = new MeshBasicMaterial({
-        color: 0xeeeeee,
-        map: texture,
-      });
+      var doorGroup = new Group();
+      doorGroup.position.set(innnerX, innnerY, innnerZ);
 
-      var refrigeratorGeo = new BoxGeometry(dk, 2, dc); //箱主体底宽30，高2，长40
-      var refrigerator = new Mesh(refrigeratorGeo, refrigeratorMatBasic);
-      refrigerator.position.set(0, 1, 0);
-
-      var refrigeratorzGeo = new BoxGeometry(2, 88, dc); //箱左侧，厚2，高88，长40
-      var refrigeratorzMaterials = [];
-      refrigeratorzMaterials.push(
-        //push顺序：X轴正、反，Y轴正、反，Z轴正、反
-        refrigeratorMatLambert,
-        refrigeratorMatLambert,
-        refrigeratorMatLambert,
-        refrigeratorMatLambert,
-        new MeshBasicMaterial({
-          color: 0xbebebe,
-          map: texture2,
-        }),
-        refrigeratorMatBasic
+      // 正前方顶部广告位
+      var topAdGeo = new BoxGeometry(dw, 30, 2); // 柜子门宽，高，厚
+      var topAd = new Mesh(
+        topAdGeo,
+        new MeshLambertMaterial({ color: themeColor })
       );
-      var refrigeratorz = new Mesh(refrigeratorzGeo, refrigeratorzMaterials);
-      refrigeratorz.position.set(dk / 2 - 1, 46, 0);
+      topAd.name = "Top Ad";
+      topAd.position.set(dw / 2, dh - 15, dw);
+      doorGroup.add(topAd);
 
-      var refrigeratoryGeo = new BoxGeometry(2, 88, dc); //箱左侧，厚2，高88，长40
-      var refrigeratoryMaterials = [];
-      refrigeratoryMaterials.push(
-        refrigeratorMatLambert,
-        refrigeratorMatBasic,
-        refrigeratorMatLambert,
-        refrigeratorMatLambert,
-        new MeshBasicMaterial({
-          color: 0xbebebe,
-          map: texture3,
-        }),
-        refrigeratorMatBasic
+      //设置柜体门
+      var doorGeo = new BoxGeometry(dw, 100, 2); // 柜子门宽，高，厚
+      // 门框
+      var doorFrame = new Mesh(
+        doorGeo,
+        new MeshLambertMaterial({ color: themeColor }) // 门框纹理
       );
-      var refrigeratory = new Mesh(refrigeratoryGeo, refrigeratoryMaterials);
-      refrigeratory.position.set(-dk / 2 + 1, 46, 0);
+      doorFrame.name = "Door Frame";
+      doorFrame.position.set(dw / 2, dh - 82, dw);
+      // 为了做门的几何运算（并集）
+      doorFrame.updateMatrix();
 
-      var refrigeratorhGeo = new BoxGeometry(dk - 4, 88, 2); //后板宽26，高88，厚2
-      var refrigeratorh = new Mesh(refrigeratorhGeo, refrigeratorMatBasic);
-
-      refrigeratorh.position.set(0, 46, 0 - dc / 2 + 1);
-
-      var refrigeratorsGeo = new BoxGeometry(dk, 2, dc);
-      var refrigeratorsMaterials = [];
-      refrigeratorsMaterials.push(
-        refrigeratorMatBasic,
-        refrigeratorMatBasic,
-        refrigeratorMatBasic,
-        refrigeratorMatLambert,
-        refrigeratorMatLambert,
-        refrigeratorMatLambert
-      );
-      var refrigerators = new Mesh(refrigeratorsGeo, refrigeratorsMaterials);
-      refrigerators.position.set(0, 91, 0);
-      refrigerators.name = "refrigerators";
-
-      refrigeratorGroup.add(
-        refrigeratord,
-        refrigeratorz,
-        refrigeratory,
-        refrigeratorh,
-        refrigerators
-      ); //refrigeratorGroup不包括机箱门
-
-      //设置机箱门
-      var menGroup = new Group();
-      menGroup.position.set(innnerX + 15, innnerY, innnerZ + 20);
-      //   menGroup.name = this.number; //机箱门的名字为输入的编号
-
-      var menGeo = new BoxGeometry(dk, 92, 1); //机箱们宽，高，厚
+      // 玻璃部分
+      var grassGeo = new BoxGeometry(dw - 4, 92, 2); // 柜子玻璃部宽，高，厚
       var mMaterials = [];
       mMaterials.push(
-        new MeshLambertMaterial({ color: 0x999999 }),
-        new MeshLambertMaterial({ color: 0x999999 }),
-        new MeshLambertMaterial({ color: 0x999999 }),
-        new MeshLambertMaterial({ color: 0x999999 }),
-        new MeshLambertMaterial({
-          map: ImageUtils.loadTexture("img/rack_front_door.jpg", {}, render),
-          overdraw: true,
+        new MeshBasicMaterial({
+          color: 0x58acfa,
+          opacity: 0.4,
+          transparent: true,
         }),
         new MeshBasicMaterial({
-          map: ImageUtils.loadTexture("img/rack_door_back.jpg", {}, render),
-          overdraw: true,
-        })
+          color: 0x58acfa,
+          opacity: 0.4,
+          transparent: true,
+        }),
+        new MeshBasicMaterial({
+          color: 0x58acfa,
+          opacity: 0.4,
+          transparent: true,
+        }),
+        new MeshBasicMaterial({
+          color: 0x58acfa,
+          opacity: 0.4,
+          transparent: true,
+        }),
+        new MeshBasicMaterial({
+          color: 0x58acfa,
+          opacity: 0.4,
+          transparent: true,
+        }), // 玻璃质感
+        new MeshBasicMaterial({
+          color: 0x58acfa,
+          opacity: 0.4,
+          transparent: true,
+        }) // 玻璃质感
       );
 
-      var men = new Mesh(menGeo, mMaterials);
-      men.name = "men";
-      men.position.set(-dk / 2, 46, 0.5);
-      menGroup.add(men);
+      var grass = new Mesh(grassGeo, mMaterials);
+      grass.name = "Door Frame Grass";
+      grass.position.set(dw / 2, dh - 82, dw);
+      // 为了做门的几何运算（并集）
+      grass.updateMatrix();
+      var door = CSG.subtract(doorFrame, grass);
+      doorGroup.add(door);
 
-      scene.add(refrigeratorGroup, menGroup);
+      // 正前方底部广告位
+      var bottomAdGeo = new BoxGeometry(dw, 30, 2); // 柜子门宽，高，厚
+      var bottomAd = new Mesh(
+        bottomAdGeo,
+        new MeshLambertMaterial({ color: themeColor })
+      );
+      bottomAd.name = "Top Ad";
+      bottomAd.position.set(dw / 2, dh - 150, dw);
+      doorGroup.add(bottomAd);
+
+      refrigeratorGroup.add(doorGroup);
+      render();
     }
   );
-  // 右视图
-  var rightTexture: TextureLoader = new TextureLoader();
-  rightTexture.load("/src/assets/img/refrigerator_front.png");
-  // 背面
-  var frontTexture: TextureLoader = new TextureLoader();
-  frontTexture.load("/src/assets/img/refrigerator_front.png");
 
-  var refrigeratorGroup = new Group();
-  // boxGroup的平面中心是机柜主体的平面中心
-  refrigeratorGroup.position.set(innnerX, innnerY, innnerZ);
-  refrigeratorGroup.name = "refrigeratorGroup";
+  // 机身
+  var bodyGeo = new BoxGeometry(dw, dh, dd); // 柜子门宽，高，厚
+  var body = new Mesh(bodyGeo, new MeshLambertMaterial({ color: themeColor }));
+  body.name = "Refrigerator body";
+  body.position.set(dw / 2, dh / 2, dd / 2);
+  // 为了机身内部的几何运算（并集）
+  body.updateMatrix();
+
+  // 机身内部空间
+  var bodyInsideGeo = new BoxGeometry(dw - 4, 92, dd - 8); // 柜子门宽，高，厚
+  var bInsideMaterials = [];
+  bInsideMaterials.push(
+    new MeshLambertMaterial({
+      color: 0xffffff,
+      opacity: 0.9,
+      transparent: true,
+    }),
+    new MeshLambertMaterial({
+      color: 0xffffff,
+      opacity: 0.9,
+      transparent: true,
+    }),
+    new MeshLambertMaterial({
+      color: 0xffffff,
+      opacity: 0.9,
+      transparent: true,
+    }),
+    new MeshLambertMaterial({
+      color: 0xffffff,
+      opacity: 0.9,
+      transparent: true,
+    }),
+    new MeshLambertMaterial({
+      color: 0xffffff,
+      opacity: 0.9,
+      transparent: true,
+    }), // 玻璃质感
+    new MeshLambertMaterial({
+      color: 0xffffff,
+      opacity: 0.9,
+      transparent: true,
+    }) // 玻璃质感
+  );
+  var bodyInside = new Mesh(bodyInsideGeo, bInsideMaterials);
+  bodyInside.name = "Refrigerator body inside";
+  bodyInside.position.set(dw / 2, dh / 2, dd / 2 + 4);
+  // 为了机身内部的几何运算（并集）
+  bodyInside.updateMatrix();
+
+  var refrigeratorBody = CSG.subtract(body, bodyInside);
+  refrigeratorGroup.add(refrigeratorBody);
+
+  scene.add(refrigeratorGroup);
 }
 </script>

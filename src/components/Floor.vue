@@ -30,7 +30,6 @@ const props = defineProps({
 });
 
 const scene = new Scene();
-
 //配置相机
 var camera: PerspectiveCamera;
 function initCamera() {
@@ -71,7 +70,7 @@ function initFloor(texture: Texture) {
   scene.add(floor);
 }
 
-refrigerator.init(0, 0, 0, scene, render);
+refrigerator.init(0, 0, 0, 0xffffff, scene, render);
 
 //配置光源
 var dircLight;
