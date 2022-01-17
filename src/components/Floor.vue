@@ -35,7 +35,7 @@ var camera: PerspectiveCamera;
 function initCamera() {
   camera = new PerspectiveCamera(45, innerWidth / innerHeight, 0.1, 2000);
   // 视角
-  camera.position.set(50, 100, 500);
+  camera.position.set(100, 300, (innerWidth * 2) / 3);
   // const helper = new CameraHelper(camera);
   // scene.add(helper);
 }
@@ -76,9 +76,9 @@ refrigerator.init(0, 0, 0, 0xffffff, scene, render);
 var dircLight;
 function initLight() {
   dircLight = new DirectionalLight(0xffffff);
-  dircLight.position.set(300, 300, 500);
+  dircLight.position.set(800, 1000, 1000);
   scene.add(dircLight);
-  scene.add(new AmbientLight(0x444444));
+  scene.add(new AmbientLight(0xffffff, 0.4));
 }
 initLight();
 
