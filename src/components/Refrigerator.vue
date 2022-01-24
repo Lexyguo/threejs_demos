@@ -7,6 +7,9 @@ import {
   MeshBasicMaterial,
   MeshLambertMaterial,
   MeshPhysicalMaterial,
+  RepeatWrapping,
+  Texture,
+  TextureLoader,
 } from "three";
 import { CSG } from "three-csg-ts";
 
@@ -132,34 +135,89 @@ export function init(x: number, y: number, z: number, themeColor: number) {
   frontGroup.position.set(innnerX, innnerY, innnerZ);
 
   // 正前方顶部广告位
-  var topAdGeo = new BoxGeometry(dw, 60, 8); // 柜子门宽，高，厚
-  var topAd = new Mesh(
-    topAdGeo,
-    new MeshLambertMaterial({ color: themeColor })
+  var topAdTexture: TextureLoader = new TextureLoader();
+  topAdTexture.load(
+    "https://gimg2.baidu.com/image_search/src=http%3A%2F%2Fwww.designhill.com%2Fdesign-blog%2Fwp-content%2Fuploads%2F2019%2F04%2F9-min-3.jpg&refer=http%3A%2F%2Fwww.designhill.com&app=2002&size=f9999,10000&q=a80&n=0&g=0n&fmt=jpeg?sec=1645606909&t=6d48a72f96a0d29fbace8124d7701e4b",
+    (texture: Texture) => {
+      texture.wrapS = texture.wrapT = RepeatWrapping;
+      var topAdGeo = new BoxGeometry(dw, 60, 8); // 柜子门宽，高，厚
+      var topAd = new Mesh(topAdGeo, [
+        new MeshLambertMaterial({ color: themeColor }),
+        new MeshLambertMaterial({ color: themeColor }),
+        new MeshLambertMaterial({ color: themeColor }),
+        new MeshLambertMaterial({ color: themeColor }),
+        new MeshLambertMaterial({ color: themeColor, map: texture }),
+        new MeshLambertMaterial({ color: themeColor }),
+      ]);
+      topAd.name = "Top Ad";
+      topAd.position.set(dw / 2, dh - 30, dw);
+
+      frontGroup.add(topAd);
+    }
   );
-  topAd.name = "Top Ad";
-  topAd.position.set(dw / 2, dh - 30, dw);
-  frontGroup.add(topAd);
 
   // 门
   const door = new Door(dw, dh, dd, themeColor);
   frontGroup.add(door.door);
 
   // 正前方底部广告位
-  var bottomAdGeo = new BoxGeometry(dw, 60, 8); // 柜子门宽，高，厚
-  var bottomAd = new Mesh(
-    bottomAdGeo,
-    new MeshLambertMaterial({ color: themeColor })
+  var bottomAdTexture: TextureLoader = new TextureLoader();
+  bottomAdTexture.load(
+    "https://gimg2.baidu.com/image_search/src=http%3A%2F%2Finews.gtimg.com%2Fnewsapp_match%2F0%2F7914776942%2F0.jpg&refer=http%3A%2F%2Finews.gtimg.com&app=2002&size=f9999,10000&q=a80&n=0&g=0n&fmt=jpeg?sec=1645606804&t=01f36b17184f0a06a5350264233f166a",
+    (texture: Texture) => {
+      texture.wrapS = texture.wrapT = RepeatWrapping;
+      var bottomAdGeo = new BoxGeometry(dw, 60, 8); // 柜子门宽，高，厚
+      var bottomAd = new Mesh(bottomAdGeo, [
+        new MeshLambertMaterial({ color: themeColor }),
+        new MeshLambertMaterial({ color: themeColor }),
+        new MeshLambertMaterial({ color: themeColor }),
+        new MeshLambertMaterial({ color: themeColor }),
+        new MeshLambertMaterial({ color: themeColor, map: texture }),
+        new MeshLambertMaterial({ color: themeColor }),
+      ]);
+      bottomAd.name = "Top Ad";
+      bottomAd.position.set(dw / 2, dh - 300, dw);
+      frontGroup.add(bottomAd);
+    }
   );
-  bottomAd.name = "Top Ad";
-  bottomAd.position.set(dw / 2, dh - 300, dw);
-  frontGroup.add(bottomAd);
 
   refrigeratorGroup.add(frontGroup);
 
   // 机身
   var bodyGeo = new BoxGeometry(dw, dh, dd); // 柜子门宽，高，厚
-  var body = new Mesh(bodyGeo, new MeshLambertMaterial({ color: themeColor }));
+  var bodyMaterials: MeshBasicMaterial[] = [
+    new MeshLambertMaterial({ color: 0x666767 }),
+    new MeshLambertMaterial({ color: 0x666767 }),
+    new MeshLambertMaterial({ color: 0x666767 }),
+    new MeshLambertMaterial({ color: 0x666767 }),
+    new MeshLambertMaterial({ color: 0x666767 }),
+    new MeshLambertMaterial({ color: 0x666767 }),
+  ];
+  var leftAdTexture: TextureLoader = new TextureLoader();
+  leftAdTexture.load(
+    "https://gimg2.baidu.com/image_search/src=http%3A%2F%2Fimg.zcool.cn%2Fcommunity%2F01b7be568248006ac7251bb60e38ab.png%401280w_1l_2o_100sh.png&refer=http%3A%2F%2Fimg.zcool.cn&app=2002&size=f9999,10000&q=a80&n=0&g=0n&fmt=jpeg?sec=1645607486&t=0b14abfa748321bbdd466be1b0183ae2",
+    (texture: Texture) => {
+      texture.wrapS = texture.wrapT = RepeatWrapping;
+      bodyMaterials.splice(
+        0,
+        1,
+        new MeshLambertMaterial({ color: 0x666767, map: texture })
+      );
+    }
+  );
+  var rightAdTexture: TextureLoader = new TextureLoader();
+  rightAdTexture.load(
+    "https://gimg2.baidu.com/image_search/src=http%3A%2F%2Fimg.zcool.cn%2Fcommunity%2F01b7be568248006ac7251bb60e38ab.png%401280w_1l_2o_100sh.png&refer=http%3A%2F%2Fimg.zcool.cn&app=2002&size=f9999,10000&q=a80&n=0&g=0n&fmt=jpeg?sec=1645607486&t=0b14abfa748321bbdd466be1b0183ae2",
+    (texture: Texture) => {
+      texture.wrapS = texture.wrapT = RepeatWrapping;
+      bodyMaterials.splice(
+        1,
+        1,
+        new MeshLambertMaterial({ color: 0x666767, map: texture })
+      );
+    }
+  );
+  var body = new Mesh(bodyGeo, bodyMaterials);
   body.name = "Refrigerator body";
   body.position.set(dw / 2, dh / 2, dd / 2);
   // 为了机身内部的几何运算（并集）
@@ -171,33 +229,21 @@ export function init(x: number, y: number, z: number, themeColor: number) {
   bInsideMaterials.push(
     new MeshLambertMaterial({
       color: 0xffffff,
-      opacity: 0.9,
-      transparent: true,
     }),
     new MeshLambertMaterial({
       color: 0xffffff,
-      opacity: 0.9,
-      transparent: true,
     }),
     new MeshLambertMaterial({
       color: 0xffffff,
-      opacity: 0.9,
-      transparent: true,
     }),
     new MeshLambertMaterial({
       color: 0xffffff,
-      opacity: 0.9,
-      transparent: true,
     }),
     new MeshLambertMaterial({
       color: 0xffffff,
-      opacity: 0.9,
-      transparent: true,
     }), // 玻璃质感
     new MeshLambertMaterial({
       color: 0xffffff,
-      opacity: 0.9,
-      transparent: true,
     }) // 玻璃质感
   );
   var bodyInside = new Mesh(bodyInsideGeo, bInsideMaterials);
