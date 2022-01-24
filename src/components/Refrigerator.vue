@@ -5,8 +5,8 @@ import {
   Clock,
   BoxGeometry,
   MeshBasicMaterial,
-  MeshPhongMaterial,
   MeshLambertMaterial,
+  MeshPhysicalMaterial,
 } from "three";
 import { CSG } from "three-csg-ts";
 
@@ -36,30 +36,57 @@ class Door {
   private initDoor(dw: number, dh: number, themeColor: number) {
     //设置柜体门
     var doorGeo = new BoxGeometry(dw, 200, 8); // 柜子门宽，高，厚
-    // 门框
-    var doorFrame = new Mesh(
+    // 门整体
+    var doorPart = new Mesh(
       doorGeo,
       new MeshLambertMaterial({ color: themeColor }) // 门框纹理
     );
-    doorFrame.name = "Door Frame";
-    doorFrame.position.set(dw / 2, dh - 164, dw);
+    doorPart.name = "Door Frame";
+    doorPart.position.set(dw / 2, dh - 164, dw);
     // 为了做门的几何运算（并集）
-    doorFrame.updateMatrix();
+    doorPart.updateMatrix();
 
-    // 玻璃部分
+    // 玻璃镂空部分
+    var glassPartGeo = new BoxGeometry(dw - 16, 184, 8); // 柜子玻璃部宽，高，厚
+    var glassPart = new Mesh(
+      glassPartGeo,
+      new MeshPhysicalMaterial({
+        map: null,
+        color: 0xcfcfcf,
+        metalness: 0,
+        roughness: 0,
+        opacity: 0.45,
+        transparent: true,
+        envMapIntensity: 10,
+        premultipliedAlpha: true,
+      })
+    );
+    glassPart.name = "Door Frame glass part";
+    glassPart.position.set(dw / 2, dh - 164, dw);
+    // 为了做门的几何运算（并集）
+    glassPart.updateMatrix();
+
+    // 门框
+    this.door = CSG.subtract(doorPart, glassPart);
+
+    // 门上玻璃部分
     var glassGeo = new BoxGeometry(dw - 16, 184, 8); // 柜子玻璃部宽，高，厚
     var glass = new Mesh(
       glassGeo,
-      new MeshPhongMaterial({
-        color: 0xffffff,
-        refractionRatio: 0.8,
+      new MeshPhysicalMaterial({
+        map: null,
+        color: 0xcfcfcf,
+        metalness: 0,
+        roughness: 0,
+        opacity: 0.45,
+        transparent: true,
+        envMapIntensity: 10,
+        premultipliedAlpha: true,
       })
     );
     glass.name = "Door Frame glass";
-    glass.position.set(dw / 2, dh - 164, dw);
-    // 为了做门的几何运算（并集）
-    glass.updateMatrix();
-    this.door = CSG.subtract(doorFrame, glass);
+    // 加上玻璃后的门
+    this.door.add(glass);
   }
 
   public doorAnimate() {

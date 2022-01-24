@@ -92,7 +92,7 @@ function initRenderer() {
     antialias: true, //抗锯齿:true
   });
   renderer.setSize(innerWidth, innerHeight); //画布尺寸
-  renderer.setClearColor("#3e93dd"); //背景色
+  renderer.setClearColor("#030f2e"); //背景色
   document.body.appendChild(renderer.domElement);
 }
 initRenderer();
@@ -125,7 +125,7 @@ function onMouseDown(event: MouseEvent) {
   let vector = new Vector3( // 将鼠标位置归一化为设备坐标。x 和 y 方向的取值范围是 (-1 to +1)
     (event.clientX / window.innerWidth) * 2 - 1,
     -(event.clientY / window.innerHeight) * 2 + 1,
-    0.5
+    1
   );
   vector = vector.unproject(camera);
   const raycaster = new Raycaster( // 通过摄像机和鼠标位置更新射线
