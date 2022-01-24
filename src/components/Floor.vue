@@ -4,6 +4,8 @@ import {
   Mesh,
   Scene,
   Texture,
+  Vector3,
+  Raycaster,
   AxesHelper,
   BoxGeometry,
   CameraHelper,
@@ -35,7 +37,7 @@ var camera: PerspectiveCamera;
 function initCamera() {
   camera = new PerspectiveCamera(45, innerWidth / innerHeight, 0.1, 2000);
   // 视角
-  camera.position.set(100, 300, (innerWidth * 2) / 3);
+  camera.position.set(100, 300, 1000);
   // const helper = new CameraHelper(camera);
   // scene.add(helper);
 }
@@ -70,7 +72,8 @@ function initFloor(texture: Texture) {
   scene.add(floor);
 }
 
-refrigerator.init(0, 0, 0, 0xffffff, scene, render);
+const { refrigeratorGroup, door } = refrigerator.init(0, 0, 0, 0xffffff);
+scene.add(refrigeratorGroup);
 
 //配置光源
 var dircLight;
@@ -117,6 +120,27 @@ function onResize() {
   }
 }
 
+function onMouseDown(event: MouseEvent) {
+  // console.log(event);
+  let vector = new Vector3( // 将鼠标位置归一化为设备坐标。x 和 y 方向的取值范围是 (-1 to +1)
+    (event.clientX / window.innerWidth) * 2 - 1,
+    -(event.clientY / window.innerHeight) * 2 + 1,
+    0.5
+  );
+  vector = vector.unproject(camera);
+  const raycaster = new Raycaster( // 通过摄像机和鼠标位置更新射线
+    camera.position,
+    vector.sub(camera.position).normalize()
+  );
+
+  // 计算物体和射线的交点
+  const intersects = raycaster.intersectObjects([door.door]);
+  if (intersects.length > 0) {
+    door.doorAnimate();
+    render();
+  }
+}
+
 function onDocumentMouseDown(event: Event) {
   event.preventDefault();
   render();
@@ -126,6 +150,8 @@ onMounted(() => {
   // 浏览器变化时画布自适应
   window.addEventListener("resize", onResize, false);
   document.addEventListener("dblclick", onDocumentMouseDown, false);
+  //给window绑定 开门点击事件
+  window.addEventListener("click", onMouseDown);
 });
 
 onUpdated(() => {});
